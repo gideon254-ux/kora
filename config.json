@@ -1,0 +1,48 @@
+{
+  "opencode": {
+    "version": "1.0.0",
+    "name": "OpenCode Assistant",
+    "description": "Voice-controlled system management assistant"
+  },
+  "audio": {
+    "sample_rate": 16000,
+    "channels": 1,
+    "block_size": 8000,
+    "device_index": null
+  },
+  "wake_word": {
+    "phrases": ["hey opencode", "hey open code"],
+    "timeout_seconds": 10
+  },
+  "speech": {
+    "model_path": "/models/en_US-libritts_r-medium.onnx",
+    "voice": "en_US-libritts_r-medium"
+  },
+  "recognition": {
+    "model_path": "/models/vosk",
+    "language": "en-US"
+  },
+  "commands": {
+    "system_status": ["system status", "check system"],
+    "network_status": ["network status", "check network"],
+    "docker_status": ["list containers", "docker status"],
+    "diagnostics": ["run diagnostics", "diagnose"],
+    "time": ["what time", "current time"],
+    "date": ["what date", "today's date"],
+    "help": ["help", "what can you do"],
+    "shutdown": ["shutdown opencode", "stop listening", "exit"]
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "/app/logs/opencode.log",
+    "max_bytes": 10485760,
+    "backup_count": 5
+  },
+  "features": {
+    "docker_management": true,
+    "system_monitoring": true,
+    "network_monitoring": true,
+    "diagnostics": true,
+    "browser_control": true
+  }
+}
