@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  opencode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opencode-assistant
+    hostname: opencode
+    restart: unless-stopped
+    
+    # Privileged mode for Docker-in-Docker and hardware access
+    privileged: true
+    
+    # Network mode host for full network access
+    network_mode: host
+    
+    # Device access for audio
+    devices:
+      - /dev/snd:/dev/snd  # Audio devices
+    
+    # Volume mounts
+    volumes:
+      # Application logs
+      - ./logs:/app/logs
+      
+      # Docker socket for container management
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+      # PulseAudio socket (if using PulseAudio)
+      - /run/user/1000/pulse:/run/user/1000/pulse
+      
+      # Configuration persistence
+      - ./config:/app/config
+      
+      # Models (optional - if you want to persist downloaded models)
+      - ./models:/models
+    
+    environment:
+      # Application settings
+      - VOSK_MODEL_PATH=/models/vosk
+      - PYTHONUNBUFFERED=1
+      
+      # Audio settings
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
+      - ALSA_CARD=0
+      
+      # Timezone
+      - TZ=Africa/Nairobi
+      
+      # Docker access
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    
+    # Group IDs for audio and docker access
+    group_add:
+      - audio
+      - video
+    
+    # User mapping (adjust UID/GID as needed)
+    user: "${UID:-1000}:${GID:-1000}"
+    
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import psutil; exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Optional: Separate network for isolation
+networks:
+  default:
+    name: opencode-network
+    driver: bridge
+
+# Named volumes (alternative to bind mounts)
+volumes:
+  opencode-logs:
+    driver: local
+  opencode-models:
+    driver: local
